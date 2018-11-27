@@ -1,0 +1,7 @@
+[package]
+name = "enclog"
+version = "0.1.0"
+authors = ["sproxet <sproxet@users.noreply.github.com>"]
+
+[dependencies]
+sodiumoxide = "0.1.0"
