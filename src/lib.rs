@@ -239,12 +239,11 @@ impl<'a, R: io::Read> Iterator for LogReader<'a, R> {
 mod tests {
     use sodiumoxide::crypto::box_;
     use super::{LogReader, LogWriter};
-    use std::fs;
-    use std::fs::File;
+    use std::io::{Cursor, Seek, SeekFrom};
 
     #[test]
     fn write_read() {
-        let mut data = File::create("/tmp/enclog.test").unwrap();
+        let mut data = Cursor::new(vec![0; 1024]);
         let (pubkey, seckey) = box_::gen_keypair();
 
         {
@@ -253,7 +252,7 @@ mod tests {
             logger.log(b"Goodbye, world!\n").unwrap();
         }
 
-        let mut data = File::open("/tmp/enclog.test").unwrap();
+        data.seek(SeekFrom::Start(0)).unwrap();
 
         {
             let mut reader = LogReader::new(&seckey.0, &mut data).unwrap();
@@ -261,7 +260,5 @@ mod tests {
             assert_eq!(reader.next().unwrap(), b"Goodbye, world!\n");
             assert_eq!(reader.next(), None);
         }
-
-        fs::remove_file("/tmp/enclog.test").unwrap();
     }
 }
